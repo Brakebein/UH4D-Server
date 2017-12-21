@@ -1,0 +1,11 @@
+const utils = require('../modules/utils');
+const express = require('express');
+const router = express.Router();
+
+const image = require('./image');
+router.get('/search', image.query);
+
+router.get('/image', image.query);
+// router.get('/image/:id', image.get);
+
+module.exports = router;

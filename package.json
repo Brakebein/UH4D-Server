@@ -1,0 +1,26 @@
+{
+  "name": "uh4d-server",
+  "version": "0.1.0",
+  "description": "Backend for UH4D-Browser",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Brakebein",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "body-parser": "^1.18.2",
+    "child-process-promise": "^2.2.1",
+    "express": "^4.16.2",
+    "fs-extra-promise": "^1.0.1",
+    "iconv": "^2.3.0",
+    "log4js": "^2.4.1",
+    "neo4j-driver": "^1.5.1",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
+    "shortid": "^2.2.8",
+    "uuid": "^3.1.0",
+    "xml-stream": "^0.4.5"
+  }
+}
