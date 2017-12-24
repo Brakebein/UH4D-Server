@@ -6,6 +6,9 @@ const image = require('./image');
 router.get('/search', image.query);
 
 router.get('/image', image.query);
-// router.get('/image/:id', image.get);
+router.get('/image/:id', image.get);
+
+const digitalobject = require('./digitalobject');
+router.get('/model', digitalobject.query);
 
 module.exports = router;

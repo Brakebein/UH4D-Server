@@ -384,6 +384,7 @@ function writeData(data) {
 		RETURN image`;
 
 	let id = shortid.generate() + '_' + data.file.original;
+	// TODO: create short id for author/owner
 
 	let params = {
 		imageId: id,
