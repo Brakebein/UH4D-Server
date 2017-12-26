@@ -37,6 +37,7 @@ OPTIONAL MATCH (e65)-[:P4]->(:E52)-[:P82]->(date:E61)
 OPTIONAL MATCH (image)-[:P105]->(:E40)-[:P131]->(owner:E82)
 OPTIONAL MATCH (image)-[:P3]->(desc:E62)-[:P3_1]->(:E55 {id: "image_description"})
 OPTIONAL MATCH (image)-[:P3]->(misc:E62)-[:P3_1]->(:E55 {id: "image_miscellaneous"})
+OPTIONAL MATCH (image)-[:has_spatial]->(spatial:Spatial)
 OPTIONAL MATCH (image)-[:has_tag]->(tag:TAG)
 
 RETURN image.id AS id,
@@ -48,6 +49,7 @@ RETURN image.id AS id,
        owner.value AS owner,
        desc.value AS description,
        misc.value AS misc,
+       spatial,
        collect(tag.id) AS tags
 LIMIT 20;
 
@@ -61,6 +63,7 @@ OPTIONAL MATCH (e65)-[:P4]->(:E52)-[:P82]->(date:E61)
 OPTIONAL MATCH (image)-[:P105]->(:E40)-[:P131]->(owner:E82)
 OPTIONAL MATCH (image)-[:P3]->(desc:E62)-[:P3_1]->(:E55 {id: "image_description"})
 OPTIONAL MATCH (image)-[:P3]->(misc:E62)-[:P3_1]->(:E55 {id: "image_miscellaneous"})
+OPTIONAL MATCH (image)-[:has_spatial]->(spatial:Spatial)
 OPTIONAL MATCH (image)-[:has_tag]->(tag:TAG)
 
 WITH image, file, title, identifier, author, date, owner, desc, misc, tag
@@ -76,5 +79,6 @@ RETURN image.id AS id,
        owner.value AS owner,
        desc.value AS description,
        misc.value AS misc,
+       spatial,
        collect(tag.id) AS tags
 LIMIT 20;

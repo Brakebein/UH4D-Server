@@ -7,6 +7,7 @@ router.get('/search', image.query);
 
 router.get('/image', image.query);
 router.get('/image/:id', image.get);
+router.put('/image/:id/spatial', image.setSpatial);
 
 const digitalobject = require('./digitalobject');
 router.get('/model', digitalobject.query);
