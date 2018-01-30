@@ -5,13 +5,17 @@ const log4js = require('log4js');
 // logger
 log4js.configure({
 	appenders: {
-		out: { type: 'console' }
+		out: { type: 'console' },
+		logfile: {
+			type: 'file',
+			filename: 'logs/server.log'
+		}
 	},
 	categories: {
-		default: { appenders: ['out'], level: 'all' }
+		default: { appenders: ['out', 'logfile'], level: 'all' }
 	}
 });
-const logger = log4js.getLogger('parse-dfd');
+const logger = log4js.getLogger('UH4D');
 console.log = logger.info.bind(logger);
 console.debug = logger.debug.bind(logger);
 console.warn = logger.warn.bind(logger);
@@ -58,9 +62,10 @@ const server = app.listen(app.get('port'), function () {
 server.timeout = 600000; // 10 minutes
 
 
-// properly shutdown server
+// shutdown routine
 process.on('exit', function () {
 	server.close();
+	log4js.shutdown();
 });
 
 // catch ctrl+c event and exit properly

@@ -25,14 +25,20 @@ console.debug = logger.debug.bind(logger);
 console.warn = logger.warn.bind(logger);
 console.error = logger.error.bind(logger);
 
+let retrievalPath;
 
-let retrievalPath = 'kronentor';
+if (process.argv[2] && typeof process.argv[2] === 'string')
+	retrievalPath = process.argv[2];
+else {
+	console.error('No folder specified!');
+	process.exit(1);
+}
 
 // read directory with images
 fs.readdirAsync(retrievalPath)
 	.then(function (files) {
 
-		files.splice(0, 45);
+		//files.splice(0, 45);
 
 		return Promise.mapSeries(files, function (file, index, length) {
 
@@ -68,7 +74,7 @@ fs.readdirAsync(retrievalPath)
 			console.error(reason);
 		else
 			console.error('Something failed!');
-		process.exit();
+		process.exit(1);
 	});
 
 function processWorkflow(file) {
@@ -227,6 +233,11 @@ function parseDescription(array) {
 			if (/Foto:\s[0-9.\/]+/.test(el)) {
 				desc.date = /Foto:\s([0-9.\/]+)/.exec(el)[1];
 			}
+			else if (/Foto:\s.+,\s[0-9.\/]+/.test(el)) {
+				let matches = /Foto:\s(.+),\s([0-9.\/]+)/.exec(el);
+				desc.author = matches[1];
+				desc.date = matches[2];
+			}
 			// if next element is 'strong' tag -> author
 			else if (array[i + 1] instanceof Object) {
 				desc.author = array[i + 1].$text;
@@ -384,7 +395,9 @@ function writeData(data) {
 		RETURN image`;
 
 	let id = shortid.generate() + '_' + data.file.original;
-	// TODO: create short id for author/owner
+
+	let authorId = shortid.generate() + '_' + utils.replace(data.author);
+	let ownerId = shortid.generate() + '_' + utils.replace(data.owner);
 
 	let params = {
 		imageId: id,
@@ -403,15 +416,15 @@ function writeData(data) {
 		e52id: 'e52_' + id,
 		date: data.date,
 		author: {
-			id: 'e82_' + utils.replace(data.author),
+			id: 'e82_' + authorId,
 			value: data.author
 		},
-		authorId: 'e21_' + utils.replace(data.author),
+		authorId: 'e21_' + authorId,
 		owner: {
-			id: 'e82_' + utils.replace(data.owner),
+			id: 'e82_' + ownerId,
 			value: data.owner
 		},
-		ownerId: 'e40_' + utils.replace(data.owner),
+		ownerId: 'e40_' + ownerId,
 		desc: {
 			id: 'e62_desc_' + id,
 			value: data.description
