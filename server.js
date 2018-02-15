@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const compression = require('compression');
 const log4js = require('log4js');
 
 // logger
@@ -26,6 +27,8 @@ const app = express();
 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(compression());
 
 app.all('/*', function (req, res, next) {
 	// CORS headers
