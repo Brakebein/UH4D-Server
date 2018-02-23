@@ -10,7 +10,8 @@ module.exports = {
 		let term = req.query.query ? req.query.query.split(/\s+/) : false;
 		//console.log(term);
 
-		let regexTitle = [],
+		let capNo = [],
+			regexTitle = [],
 			regexAuthor = [],
 			regexOwner = [],
 			regexTag = [];
@@ -41,7 +42,8 @@ module.exports = {
 				else if (string === 'spatial:unset')
 					q += 'spatial IS NULL';
 				else {
-					q += 'title.value =~ $regexTitle[' + index + '] ';
+					q += 'identifier.slub_cap_no = $capNo[' + index + '] ';
+					q += 'OR title.value =~ $regexTitle[' + index + '] ';
 					q += 'OR author.value =~ $regexAuthor[' + index + '] ';
 					q += 'OR owner.value =~ $regexOwner[' + index + '] ';
 					q += 'OR any(tag IN tags WHERE tag =~ $regexTag[' + index + ']) ';
@@ -49,6 +51,7 @@ module.exports = {
 
 				q += ') ';
 
+				capNo.push(string);
 				regexTitle.push('(?i).*' + string + '.*');
 				regexAuthor.push('(?i).*' + string + '.*');
 				regexOwner.push('(?i).*' + string + '.*');
@@ -60,6 +63,7 @@ module.exports = {
 				file,
 				title.value AS title,
 				identifier.permalink AS permalink,
+				identifier.slub_cap_no AS captureNumber,
 				author.value AS author,
 				date.value AS date,
 				owner.value AS owner,
@@ -70,6 +74,7 @@ module.exports = {
 			// LIMIT 20`;
 
 		let params = {
+			capNo: capNo,
 			regexTitle: regexTitle,
 			regexAuthor: regexAuthor,
 			regexOwner: regexOwner,
@@ -105,6 +110,7 @@ module.exports = {
 				file,
 				title.value AS title,
 				identifier.permalink AS permalink,
+				identifier.slub_cap_no AS captureNumber,
 				author.value AS author,
 				date.value AS date,
 				owner.value AS owner,
