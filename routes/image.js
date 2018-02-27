@@ -81,6 +81,7 @@ module.exports = {
 			regexTitle: regexTitle,
 			regexAuthor: regexAuthor,
 			regexOwner: regexOwner,
+			regexDate: regexDate,
 			regexTag: regexTag
 		};
 
