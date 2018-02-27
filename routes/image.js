@@ -14,6 +14,7 @@ module.exports = {
 			regexTitle = [],
 			regexAuthor = [],
 			regexOwner = [],
+			regexDate = [],
 			regexTag = [];
 
 		let q = `
@@ -46,6 +47,7 @@ module.exports = {
 					q += 'OR title.value =~ $regexTitle[' + index + '] ';
 					q += 'OR author.value =~ $regexAuthor[' + index + '] ';
 					q += 'OR owner.value =~ $regexOwner[' + index + '] ';
+					q += 'OR date.value =~ $regexDate[' + index + '] ';
 					q += 'OR any(tag IN tags WHERE tag =~ $regexTag[' + index + ']) ';
 				}
 
@@ -55,6 +57,7 @@ module.exports = {
 				regexTitle.push('(?i).*' + string + '.*');
 				regexAuthor.push('(?i).*' + string + '.*');
 				regexOwner.push('(?i).*' + string + '.*');
+				regexDate.push('(?i).*' + string + '.*');
 				regexTag.push('(?i).*' + string + '.*');
 			});
 		}
