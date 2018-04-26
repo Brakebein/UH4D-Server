@@ -1,6 +1,7 @@
 const utils = require('../modules/utils');
 const neo4j = require('../modules/neo4j-request');
 const Promise = require('bluebird');
+const shortid = require('shortid');
 
 module.exports = {
 
@@ -97,7 +98,7 @@ module.exports = {
 
 	get: function (req, res) {
 
-		let q = `
+		const q = `
 			MATCH (image:E38:UH4D {id: $id})-[:P106]->(file:D9),
 				(image)-[:P102]->(title:E35),
 				(image)-[:P48]->(identifier:E42),
@@ -123,7 +124,7 @@ module.exports = {
 				spatial,
 				collect(tag.id) AS tags`;
 
-		let params = {
+		const params = {
 			id: req.params.id
 		};
 
@@ -135,6 +136,60 @@ module.exports = {
 				utils.error.neo4j(res, err, '#image.get');
 			});
 
+	},
+
+	update: function (req, res) {
+
+		const id = shortid.generate();
+
+		let q = `MATCH (image:E38:UH4D {id: $id})<-[:P94]-(e65:E65) `;
+		let params = {
+			id: req.params.id
+		};
+
+		switch (req.query.prop) {
+			case 'date':
+				q += `
+					MERGE(e65)-[:P4]->(e52:E52:UH4D)-[:P82]->(date:E61:UH4D)
+						ON CREATE SET e52.id = $e52id, date.value = $date
+						ON MATCH SET date.value = $date`;
+				params.date = req.body.date;
+				params.e52id = 'e52_' + id;
+				break;
+
+			case 'author':
+				q += `OPTIONAL MATCH (e65)-[r14:P14]->(:E21)-[:P131]->(:E82 {value: $name})`;
+				if (req.body.author.length)
+					q += `
+					MERGE (e21:E21:UH4D)-[:P131]->(e82:E82:UH4D {value: $name})
+						ON CREATE SET e21.id = $e21id, e82.id = $e82id
+					CREATE (e65)-[:P14]->(e21)`;
+				q += `DELETE r14`;
+				params.name = req.body.author;
+				params.e21id = 'e21_' + id;
+				params.e82id = 'e82_' + id;
+				break;
+
+			case 'tags':
+				q += `OPTIONAL MATCH (image)-[rtag:has_tag]->(:TAG)
+					DELETE rtag
+					WITH image
+					FOREACH (tag IN $tags |
+						MERGE (t:TAG:UH4D {id: tag})
+						MERGE (image)-[:has_tag]->(t)
+					)`;
+				params.tags = req.body.tags || [];
+		}
+
+		q += ` RETURN image`;
+
+		neo4j.readTransaction(q, params)
+			.then(function () {
+				res.json(req.body)
+			})
+			.catch(function (err) {
+				utils.error.neo4j(res, err, 'image.update');
+			});
 	},
 
 	setSpatial: function (req, res) {
@@ -165,7 +220,7 @@ module.exports = {
 
 		promise
 			.then(function (params) {
-				let q = `
+				const q = `
 					MATCH (image:E38:UH4D {id: $id})
 					MERGE (spatial:Spatial:UH4D {id: $spatial.id})
 					SET spatial = $spatial
