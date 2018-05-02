@@ -148,6 +148,12 @@ module.exports = {
 		};
 
 		switch (req.query.prop) {
+			case 'title':
+				q += `MATCH (image)-[:P102]->(title:E35)
+					SET title.value = $title`;
+				params.title = req.body.title;
+				break;
+
 			case 'date':
 				q += `
 					MERGE(e65)-[:P4]->(e52:E52:UH4D)-[:P82]->(date:E61:UH4D)
@@ -158,16 +164,63 @@ module.exports = {
 				break;
 
 			case 'author':
-				q += `OPTIONAL MATCH (e65)-[r14:P14]->(:E21)-[:P131]->(:E82 {value: $name})`;
+				q += `OPTIONAL MATCH (e65)-[r14:P14]->(:E21)-[:P131]->(:E82)`;
 				if (req.body.author.length)
 					q += `
 					MERGE (e21:E21:UH4D)-[:P131]->(e82:E82:UH4D {value: $name})
 						ON CREATE SET e21.id = $e21id, e82.id = $e82id
 					CREATE (e65)-[:P14]->(e21)`;
-				q += `DELETE r14`;
+				q += ` DELETE r14`;
 				params.name = req.body.author;
-				params.e21id = 'e21_' + id;
-				params.e82id = 'e82_' + id;
+				params.e21id = 'e21_' + id + '_' + utils.replace(req.body.author);
+				params.e82id = 'e82_' + id + '_' + utils.replace(req.body.author);
+				break;
+
+			case 'owner':
+				q += `OPTIONAL MATCH (image)-[r105:P105]->(:E40)-[:P131]->(:E82)`;
+				if (req.body.owner.length)
+					q += `
+					MERGE (e40:E40)-[:P131]->(e82:E82 {value: $owner)
+						ON CREATE SET e40.id = $e40id, e82id.id = $e82id
+					CREATE (image)-[:P105]->(e21)`;
+				q += ' DELETE r105';
+				params.owner = req.body.owner;
+				params.e40id = 'e40_' + id + '_' + utils.replace(req.body.owner);
+				params.e82id = 'e82_' + id + '_' + utils.replace(req.body.owner);
+				break;
+
+			case 'captureNumber':
+				q += `MATCH (image)-[:P48]->(identifier:E42)
+					SET identifier.slub_cap_no = $captureNumber`;
+				params.captureNumber =  req.body.captureNumber;
+				break;
+
+			case 'description':
+				q += `MATCH (tdesc:E55:UH4D {id: "image_description"}) `;
+				if (req.body.description.length)
+					q += `
+					MERGE (image)-[:P3]->(desc:E62:UH4D)-[:P3_1]->(tdesc)
+						ON CREATE SET desc.id = $descId, desc.value = $desc
+						ON MATCH SET desc.value = $desc`;
+				else
+					q += `OPTIONAL MATCH (image)-[:P3]->(desc:E62)-[:P3_1]->(tdesc)
+						DETACH DELETE desc`;
+				params.desc = req.body.description;
+				params.descId = 'e62_desc_' + id;
+				break;
+
+			case 'misc':
+				q += `MATCH (tmisc:E55:UH4D {id: "image_miscellaneous"}) `;
+				if (req.body.misc.length)
+					q += `
+					MERGE (image)-[:P3]->(misc:E62:UH4D)-[:P3_1]->(tmisc)
+						ON CREATE SET misc.id = $miscId, misc.value = $misc
+						ON MATCH SET misc.value = $misc`;
+				else
+					q += `OPTIONAL MATCH (image)-[:P3]->(misc:E62)-[:P3_1]->(tmisc)
+						DETACH DELETE misc`;
+				params.misc = req.body.misc;
+				params.miscId = 'e62_misc_' + id;
 				break;
 
 			case 'tags':

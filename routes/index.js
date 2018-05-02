@@ -1,4 +1,3 @@
-const utils = require('../modules/utils');
 const express = require('express');
 const router = express.Router();
 
@@ -13,8 +12,9 @@ router.put('/image/:id/spatial', image.setSpatial);
 const digitalobject = require('./digitalobject');
 router.get('/model', digitalobject.query);
 
-const author = require('./author');
-router.get('/author', author.query);
+const actor = require('./actor');
+router.get('/person', actor.queryPersons);
+router.get('/legalbody', actor.queryLegalBodies);
 
 const tag = require('./tag');
 router.get('/tag', tag.query);

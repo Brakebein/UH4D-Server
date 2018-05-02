@@ -430,7 +430,7 @@ function writeData(data) {
 			value: data.description
 		},
 		misc: {
-			id: 'e62_' + id,
+			id: 'e62_misc_' + id,
 			value: data.misc.join(', ')
 		},
 		tags: data.tags || []
