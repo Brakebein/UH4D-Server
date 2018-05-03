@@ -25,6 +25,8 @@ module.exports = {
 		tmp: 'C:/xampp/htdocs/DokuVisTmp'
 	},
 
+	proxy: 'http://host:port',
+
 	exec: {
 		ImagickConvert: "C:/ServerTools/ImageMagick-6.9.2-4-Q16-x64/convert.exe",
 		ImagickMogrify: "C:/ServerTools/ImageMagick-6.9.2-4-Q16-x64/mogrify.exe",

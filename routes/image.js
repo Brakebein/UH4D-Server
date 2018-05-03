@@ -180,9 +180,9 @@ module.exports = {
 				q += `OPTIONAL MATCH (image)-[r105:P105]->(:E40)-[:P131]->(:E82)`;
 				if (req.body.owner.length)
 					q += `
-					MERGE (e40:E40)-[:P131]->(e82:E82 {value: $owner)
-						ON CREATE SET e40.id = $e40id, e82id.id = $e82id
-					CREATE (image)-[:P105]->(e21)`;
+					MERGE (e40:E40:UH4D)-[:P131]->(e82:E82:UH4D {value: $owner})
+						ON CREATE SET e40.id = $e40id, e82.id = $e82id
+					CREATE (image)-[:P105]->(e40)`;
 				q += ' DELETE r105';
 				params.owner = req.body.owner;
 				params.e40id = 'e40_' + id + '_' + utils.replace(req.body.owner);
