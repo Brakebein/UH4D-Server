@@ -9,7 +9,14 @@ module.exports = {
 		//console.log(req.query);
 
 		let term = req.query.query ? req.query.query.split(/\s+/) : false;
-		//console.log(term);
+		let objIncl = req.query.filterObjIncl || [];
+		let objExcl = req.query.filterObjExcl || [];
+
+		if (!Array.isArray(objIncl)) objIncl = [objIncl];
+		if (!Array.isArray(objExcl)) objExcl = [objExcl];
+
+		console.log(objIncl);
+		console.log(objExcl);
 
 		let capNo = [],
 			regexTitle = [],
@@ -19,7 +26,22 @@ module.exports = {
 			regexTag = [];
 
 		let q = `
-			MATCH (image:E38:UH4D)-[:P106]->(file:D9),
+			MATCH (image:E38:UH4D)`;
+
+		if (objIncl.length)
+			q += `
+				MATCH (image)-[:P138]->(:E22)<-[:P67]-(dobjIn:D1)
+				WHERE dobjIn.id IN $includes`;
+
+		if (objExcl.length)
+			q += `
+				MATCH (dobjEx:D1:UH4D)
+				WHERE dobjEx.id IN $excludes 
+				AND NOT (image)-[:P138]->(:E22)<-[:P67]-(dobjEx)`;
+
+		q += `
+			WITH image
+			MATCH (image)-[:P106]->(file:D9),
 				(image)-[:P102]->(title:E35),
 				(image)-[:P48]->(identifier:E42),
 				(image)<-[:P94]-(e65:E65)
@@ -83,7 +105,9 @@ module.exports = {
 			regexAuthor: regexAuthor,
 			regexOwner: regexOwner,
 			regexDate: regexDate,
-			regexTag: regexTag
+			regexTag: regexTag,
+			includes: objIncl,
+			excludes: objExcl
 		};
 
 		neo4j.readTransaction(q, params)
@@ -291,6 +315,35 @@ module.exports = {
 			.catch(function (err) {
 				utils.error.neo4j(res, err, '#image.setSpatial');
 			});
+	},
+
+	setLinksToObjects: function (req, res) {
+
+		console.log(req.query);
+
+		// res.json(req.body);
+		// return;
+
+		const q = `
+			MATCH (image:E38:UH4D {id: $imageId}), (obj:D1:UH4D)
+			WHERE obj.id IN $objIds
+			MERGE (obj)-[:P67]->(e22:E22:UH4D {id: "e22_" + obj.id})
+			MERGE (image)-[:P138]->(e22)`;
+
+		const params = {
+			imageId: req.params.id,
+			objIds: Array.isArray(req.query.objectIds) ? req.query.objectIds : [req.query.objectIds]
+		};
+
+		neo4j.writeTransaction(q, params)
+			.then(function () {
+				let result = req.body;
+				res.json(result);
+			})
+			.catch(function (err) {
+				utils.error.neo4j(res, err, 'image.setLinksToObjects');
+			});
+
 	}
 
 };
