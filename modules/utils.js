@@ -2,11 +2,11 @@ const config = require('../config');
 const Promise = require('bluebird');
 const exec = require('child-process-promise').execFile;
 
-var utils = {
+const utils = {
 
 	error: {
 		mysql: function (res, err, code) {
-			var message = 'MySQL failure';
+			let message = 'MySQL failure';
 			if (code) message += ' ' + code;
 			console.error(message, "\n", err);
 			res.status(500);
@@ -16,7 +16,7 @@ var utils = {
 			});
 		},
 		neo4j: function (res, err, code) {
-			var message = 'Neo4j failure';
+			let message = 'Neo4j failure';
 			if (code) message += ' ' + code;
 			console.error(message, "\n", err);
 			res.status(500);
@@ -26,7 +26,7 @@ var utils = {
 			});
 		},
 		server: function (res, err, code) {
-			var message = 'server failure';
+			let message = 'server failure';
 			if (code) message += ' ' + code;
 			console.error(message, "\n", err);
 			res.status(500);
@@ -47,7 +47,7 @@ var utils = {
 
 	abort: {
 		missingData: function (res, add) {
-			var message = 'Missing essential data';
+			let message = 'Missing essential data';
 			if (add) message += ' | ' + add;
 			console.warn(message);
 			res.status(510);
@@ -56,7 +56,7 @@ var utils = {
 			});
 		},
 		unsupportedFile: function (res, add) {
-			var message = 'Unsupported file format';
+			let message = 'Unsupported file format';
 			if (add) message += ' | ' + add;
 			console.warn(message);
 			res.status(415);
@@ -95,12 +95,12 @@ var utils = {
  */
 utils.resizeToNearestPowerOf2 = function (path, filename, outputname) {
 
-	var width = 0, w = 0,
+	let width = 0, w = 0,
 		height = 0, h = 0;
 
 	return exec(config.exec.ImagickIdentify, [path + filename])
 		.then(function (result) {
-			var matches = result.stdout.match(/\s(\d+)x(\d+)\s/);
+			let matches = result.stdout.match(/\s(\d+)x(\d+)\s/);
 
 			width = +matches[1];
 			height = +matches[2];
