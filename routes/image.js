@@ -15,8 +15,8 @@ module.exports = {
 		if (!Array.isArray(objIncl)) objIncl = [objIncl];
 		if (!Array.isArray(objExcl)) objExcl = [objExcl];
 
-		console.log(objIncl);
-		console.log(objExcl);
+		// console.log(objIncl);
+		// console.log(objExcl);
 
 		let capNo = [],
 			regexTitle = [],
@@ -319,7 +319,7 @@ module.exports = {
 
 	setLinksToObjects: function (req, res) {
 
-		console.log(req.query);
+		//console.log(req.query);
 
 		// res.json(req.body);
 		// return;
@@ -341,9 +341,99 @@ module.exports = {
 				res.json(result);
 			})
 			.catch(function (err) {
-				utils.error.neo4j(res, err, 'image.setLinksToObjects');
+				utils.error.neo4j(res, err, '#image.setLinksToObjects');
 			});
 
+	},
+	
+	createDummy: function (req, res) {
+
+		let q = `
+			CREATE (image:E38:UH4D {id: $imageId}),
+				(image)-[:P102]->(title:E35:UH4D $title),
+				(image)-[:P106]->(file:D9:UH4D $file),
+				(image)-[:P48]->(identifier:E42:UH4D $identifier),
+				(image)<-[:P94]-(e65:E65:UH4D {id: $e65id}),
+				(image)-[:has_spatial]->(spatial:Spatial:UH4D $spatial)
+				
+			RETURN image.id AS id,
+				file,
+				title.value AS title,
+				identifier.permalink AS permalink,
+				NULL AS captureNumber,
+				NULL AS author,
+				NULL AS date,
+				NULL AS owner,
+				NULL AS description,
+				NULL AS misc,
+				spatial,
+				[] AS tags`;
+
+		let id = shortid.generate() + '_dummy';
+
+		let params = {
+			imageId: id,
+			title: {
+				id: 'e35_' + id,
+				value: 'Dummy Image'
+			},
+			identifier: {
+				id: 'e42_' + id,
+				permalink: 'https://de.wikipedia.org/wiki/Dummy'
+			},
+			file: {
+				id: 'd9_' + id,
+				path: '',
+				original: 'white.jpg',
+				preview: 'white.jpg',
+				thumb: 'white.jpg',
+				type: 'jpg',
+				width: req.body.width,
+				height: req.body.height
+			},
+			e65id: 'e65_' + id,
+			spatial: {
+				id: 'spatial_' + id,
+				matrix: req.body.matrix,
+				offset: req.body.offset,
+				ck: req.body.ck
+			}
+		};
+
+		neo4j.writeTransaction(q, params)
+			.then(function (results) {
+				res.json(results[0]);
+			})
+			.catch(function (err) {
+				utils.error.neo4j(res, err, '#image.createDummy');
+			});
+	},
+
+	deleteDummy: function (req, res) {
+
+		let q = `
+			MATCH (image:E38:UH4D {id: $imageId}),
+				(image)-[:P102]->(title:E35),
+				(image)-[:P106]->(file:D9),
+				(image)-[:P48]->(identifier:E42),
+				(image)<-[:P94]-(e65:E65),
+				(image)-[:has_spatial]->(spatial:Spatial)
+			WHERE image.id =~ ".*_dummy"
+			DETACH DELETE image, title, file, identifier, e65, spatial`;
+
+		let params = {
+			imageId: req.params.id
+		};
+
+		neo4j.writeTransaction(q, params)
+			.then(function () {
+				res.json({
+					message: `Dummy image "${req.params}" has been deleted.`
+				});
+			})
+			.catch(function (err) {
+				utils.error.neo4j(res, err, '#image.deleteDummy');
+			});
 	}
 
 };

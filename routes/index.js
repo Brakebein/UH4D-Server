@@ -9,6 +9,8 @@ router.get('/image/:id', image.get);
 router.put('/image/:id', image.update);
 router.put('/image/:id/spatial', image.setSpatial);
 router.put('/image/:id/link', image.setLinksToObjects);
+router.post('/image/dummy', image.createDummy);
+router.delete('/image/dummy/:id', image.deleteDummy);
 
 const imageFileUpdate = require('./imageFileUpdate');
 router.get('/image/:id/file/check', imageFileUpdate.check);
