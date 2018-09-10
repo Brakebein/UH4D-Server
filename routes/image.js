@@ -319,13 +319,12 @@ module.exports = {
 
 	setLinksToObjects: function (req, res) {
 
-		//console.log(req.query);
-
-		// res.json(req.body);
-		// return;
-
 		const q = `
-			MATCH (image:E38:UH4D {id: $imageId}), (obj:D1:UH4D)
+			MATCH (image:E38:UH4D {id: $imageId})
+			OPTIONAL MATCH (image)-[r:P138]->(e22:E22)
+			DELETE r
+			WITH image
+			MATCH (obj:D1:UH4D)
 			WHERE obj.id IN $objIds
 			MERGE (obj)-[:P67]->(e22:E22:UH4D {id: "e22_" + obj.id})
 			MERGE (image)-[:P138]->(e22)`;
