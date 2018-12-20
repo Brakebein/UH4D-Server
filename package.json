@@ -1,6 +1,6 @@
 {
   "name": "uh4d-server",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Backend for UH4D-Browser",
   "main": "server.js",
   "scripts": {
