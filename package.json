@@ -20,6 +20,7 @@
     "express": "^4.16.3",
     "fs-extra-promise": "^1.0.1",
     "log4js": "^2.10.0",
+    "moment": "^2.23.0",
     "neo4j-driver": "^1.6.1",
     "request": "^2.87.0",
     "request-image-size": "^2.1.0",

@@ -4,6 +4,7 @@ const router = express.Router();
 const image = require('./image');
 router.get('/search', image.query);
 
+router.get('/image/dateExtent', image.getDateExtent);
 router.get('/image', image.query);
 router.get('/image/:id', image.get);
 router.put('/image/:id', image.update);

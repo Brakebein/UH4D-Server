@@ -2,11 +2,12 @@ const utils = require('../modules/utils');
 const neo4j = require('../modules/neo4j-request');
 const Promise = require('bluebird');
 const shortid = require('shortid');
+const parseDate = require('../modules/parseDate');
 
 module.exports = {
 
 	query: function (req, res) {
-		//console.log(req.query);
+		// console.log(req.query);
 
 		let term = req.query.query ? req.query.query.split(/\s+/) : false;
 		let objIncl = req.query.filterObjIncl || [];
@@ -27,6 +28,12 @@ module.exports = {
 
 		let q = `
 			MATCH (image:E38:UH4D)`;
+
+		if (req.query.from && req.query.to)
+			q += `
+				OPTIONAL MATCH (image)<-[:P94]-(e65:E65)-[:P4]->(:E52)-[:P82]->(date:E61)
+				WITH image, date
+				WHERE date ${req.query.undated === 'true' ? 'IS NULL OR' : 'IS NOT NULL AND'} date.to > date($from) AND date.from < date($to)`;
 
 		if (objIncl.length)
 			q += `
@@ -70,7 +77,7 @@ module.exports = {
 					q += 'OR title.value =~ $regexTitle[' + index + '] ';
 					q += 'OR author.value =~ $regexAuthor[' + index + '] ';
 					q += 'OR owner.value =~ $regexOwner[' + index + '] ';
-					q += 'OR date.value =~ $regexDate[' + index + '] ';
+					// q += 'OR date.value =~ $regexDate[' + index + '] ';
 					q += 'OR any(tag IN tags WHERE tag =~ $regexTag[' + index + ']) ';
 				}
 
@@ -80,7 +87,7 @@ module.exports = {
 				regexTitle.push('(?i).*' + string + '.*');
 				regexAuthor.push('(?i).*' + string + '.*');
 				regexOwner.push('(?i).*' + string + '.*');
-				regexDate.push('(?i).*' + string + '.*');
+				// regexDate.push('(?i).*' + string + '.*');
 				regexTag.push('(?i).*' + string + '.*');
 			});
 		}
@@ -91,7 +98,7 @@ module.exports = {
 				identifier.permalink AS permalink,
 				identifier.slub_cap_no AS captureNumber,
 				author.value AS author,
-				date.value AS date,
+				date {.*, from: toString(date.from), to: toString(date.to)} AS date,
 				owner.value AS owner,
 				desc.value AS description,
 				misc.value AS misc,
@@ -100,6 +107,8 @@ module.exports = {
 			// LIMIT 20`;
 
 		let params = {
+			from: req.query.from,
+			to: req.query.to,
 			capNo: capNo,
 			regexTitle: regexTitle,
 			regexAuthor: regexAuthor,
@@ -122,6 +131,7 @@ module.exports = {
 
 	get: function (req, res) {
 
+		// language=Cypher
 		const q = `
 			MATCH (image:E38:UH4D {id: $id})-[:P106]->(file:D9),
 				(image)-[:P102]->(title:E35),
@@ -141,7 +151,7 @@ module.exports = {
 				identifier.permalink AS permalink,
 				identifier.slub_cap_no AS captureNumber,
 				author.value AS author,
-				date.value AS date,
+				date {.*, from: toString(date.from), to: toString(date.to)} AS date,
 				owner.value AS owner,
 				desc.value AS description,
 				misc.value AS misc,
@@ -179,10 +189,18 @@ module.exports = {
 				break;
 
 			case 'date':
+				let date = parseDate(req.body.date.value);
 				q += `
 					MERGE(e65)-[:P4]->(e52:E52:UH4D)-[:P82]->(date:E61:UH4D)
-						ON CREATE SET e52.id = $e52id, date.value = $date
-						ON MATCH SET date.value = $date`;
+						ON CREATE SET e52.id = $e52id
+					SET date.value = $date.value`;
+				if (date) {
+					req.body.date = date;
+					q += `,
+						date.from = date($date.from),
+						date.to = date($date.to),
+						date.display = $date.display`;
+				}
 				params.date = req.body.date;
 				params.e52id = 'e52_' + id;
 				break;
@@ -433,6 +451,35 @@ module.exports = {
 			.catch(function (err) {
 				utils.error.neo4j(res, err, '#image.deleteDummy');
 			});
+	},
+	
+	getDateExtent: function (req, res) {
+
+		// language=Cypher
+		let q = `
+			MATCH (image:E38:UH4D)<-[:P94]-(e65:E65)-[:P4]->(:E52)-[:P82]->(date:E61)
+			WHERE exists(date.from)
+			RETURN toString(date.from) AS d
+			ORDER BY d
+			LIMIT 1
+			UNION
+			MATCH (image:E38:UH4D)<-[:P94]-(e65:E65)-[:P4]->(:E52)-[:P82]->(date:E61)
+			WHERE exists(date.to)
+			RETURN toString(date.to) AS d
+			ORDER BY d DESC
+			LIMIT 1`;
+
+		neo4j.readTransaction(q)
+			.then(function (results) {
+				res.json({
+					from: results[0].d,
+					to: results[1].d
+				});
+			})
+			.catch(function (err) {
+				utils.error.neo4j(res, err, '#image.getDateExtent');
+			});
+
 	}
 
 };
