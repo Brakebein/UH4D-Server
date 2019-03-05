@@ -85,47 +85,56 @@ function processWorkflow(file) {
 		.then(function (permalink) {
 			meta.permalink = permalink;
 
-			return requestDFDSite(permalink);
+			return checkDatabaseEntry(permalink);
+			// return requestDFDSite(permalink);
 		})
-		.then(function (tmpFile) {
+		.then(function (exists) {
+			if (exists)
+			// continue with next file
+				return Promise.resolve();
+			else
+			// continue with processing
+				return requestDFDSite(meta.permalink)
+					.then(function (tmpFile) {
 
-			return parseHTMLFile(tmpFile);
-		})
-		.then(function (value) {
-			Object.assign(meta, value);
-			//console.log(meta);
+						return parseHTMLFile(tmpFile);
+					})
+					.then(function (value) {
+						Object.assign(meta, value);
+						//console.log(meta);
 
-			return processImage(file);
-		})
-		.then(function (imageMeta) {
-			meta.file = imageMeta;
-			//console.log(meta);
+						return processImage(file);
+					})
+					.then(function (imageMeta) {
+						meta.file = imageMeta;
+						//console.log(meta);
 
-			return writeData(meta);
-		})
-		.then(function (result) {
-			console.log(result);
-			return Promise.resolve();
-		})
-		.catch(function (reason) {
-			console.error(reason);
-
-			// cleanup
-			if (meta.file && meta.file.path) {
-				let rmPath = config.path.data + '/' + meta.file.path;
-				fs.existsAsync(rmPath)
-					.then(function (exists) {
-						if (exists) {
-							console.warn ('Unlink directory:', rmPath);
-							return fs.removeAsync(rmPath);
-						}
+						return writeData(meta);
+					})
+					.then(function (result) {
+						console.log(result);
+						return Promise.resolve();
 					})
 					.catch(function (reason) {
-						console.err('Unlink directory failed:', rmPath, reason);
-					});
-			}
+						console.error(reason);
 
-			return Promise.reject();
+						// cleanup
+						if (meta.file && meta.file.path) {
+							let rmPath = config.path.data + '/' + meta.file.path;
+							fs.existsAsync(rmPath)
+								.then(function (exists) {
+									if (exists) {
+										console.warn('Unlink directory:', rmPath);
+										return fs.removeAsync(rmPath);
+									}
+								})
+								.catch(function (reason) {
+									console.err('Unlink directory failed:', rmPath, reason);
+								});
+						}
+
+						return Promise.reject();
+					});
 		});
 }
 
@@ -144,6 +153,22 @@ function searchDFD(file) {
 			console.debug(matches[1]);
 
 			return Promise.resolve(matches[1]);
+		});
+}
+
+function checkDatabaseEntry(permalink) {
+
+	let q = `
+		MATCH (image:E38:UH4D)-[:P48]->(:E42:UH4D {permalink: $identifier})
+		RETURN image`;
+
+	let params = {
+		identifier: permalink
+	};
+
+	return neo4j.readTransaction(q, params)
+		.then(function (results) {
+
 		});
 }
 
@@ -308,13 +333,13 @@ function parseDetails(array) {
 
 function processImage(file) {
 
-	let shortPath = 'images/' + uuid() + '/';
-	let path = config.path.data + '/' + shortPath;
-	let filename = utils.replace(file);
-	let filenameThumb = filename.slice(0, filename.lastIndexOf(".")) + '_thumb.jpg';
-	let filenamePreview = filename.slice(0, filename.lastIndexOf(".")) + '_preview.jpg';
-	let filenameTexture = filename.slice(0, filename.lastIndexOf(".")) + '_tex.jpg';
-	let filenameTexturePreview = filename.slice(0, filename.lastIndexOf(".")) + '_tex_preview.jpg';
+	let shortPath = 'images/' + uuid() + '/',
+		path = config.path.data + '/' + shortPath,
+		filename = utils.replace(file),
+		filenameThumb = filename.slice(0, filename.lastIndexOf(".")) + '_thumb.jpg',
+		filenamePreview = filename.slice(0, filename.lastIndexOf(".")) + '_preview.jpg';
+	// let filenameTexture = filename.slice(0, filename.lastIndexOf(".")) + '_tex.jpg';
+	// let filenameTexturePreview = filename.slice(0, filename.lastIndexOf(".")) + '_tex_preview.jpg';
 
 	let imgWidth, imgHeight;
 
@@ -326,23 +351,25 @@ function processImage(file) {
 		})
 		.then(function () {
 			// create thumbnail
-			return execFile(config.exec.ImagickConvert, [path + filename, '-resize', '160x90^', '-gravity', 'center', '-extent', '160x90', path + filenameThumb]);
+			return execFile(config.exec.ImagickConvert, [path + filename, '-resize', '200x200>', path + filenameThumb]);
+			// return execFile(config.exec.ImagickConvert, [path + filename, '-resize', '160x90^', '-gravity', 'center', '-extent', '160x90', path + filenameThumb]);
 		})
 		.then(function () {
 			// downsample preview images
-			return execFile(config.exec.ImagickConvert, [path + filename, '-resize', '1024x1024>', path + filenamePreview]);
+			return execFile(config.exec.ImagickConvert, [path + filename, '-resize', '2048x2048>', path + filenamePreview]);
+			// return execFile(config.exec.ImagickConvert, [path + filename, '-resize', '1024x1024>', path + filenamePreview]);
 		})
-		.then(function () {
-			// sample image to texture with resolution power of 2
-			return utils.resizeToNearestPowerOf2(path, filename, filenameTexture);
-		})
-		.then(function (value) {
-			imgWidth = value.originalWidth;
-			imgHeight = value.originalHeight;
-
-			// downsample image to preview texture
-			return execFile(config.exec.ImagickConvert, [path + filename, '-resize', '128x128!', path + filenameTexturePreview]);
-		})
+		// .then(function () {
+		// 	// sample image to texture with resolution power of 2
+		// 	return utils.resizeToNearestPowerOf2(path, filename, filenameTexture);
+		// })
+		// .then(function (value) {
+		// 	imgWidth = value.originalWidth;
+		// 	imgHeight = value.originalHeight;
+		//
+		// 	// downsample image to preview texture
+		// 	return execFile(config.exec.ImagickConvert, [path + filename, '-resize', '128x128!', path + filenameTexturePreview]);
+		// })
 		.then(function () {
 			return Promise.resolve({
 				path: shortPath,
@@ -350,8 +377,8 @@ function processImage(file) {
 				type: filename.split('.').pop().toLowerCase(),
 				preview: filenamePreview,
 				thumb: filenameThumb,
-				texture: filenameTexture,
-				texturePreview: filenameTexturePreview,
+				// texture: filenameTexture,
+				// texturePreview: filenameTexturePreview,
 				width: imgWidth,
 				height: imgHeight
 			});
