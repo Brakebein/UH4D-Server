@@ -9,6 +9,7 @@ const uuid = require('uuid/v4');
 const shortid = require('shortid');
 const config = require('./config');
 const utils = require('./modules/utils');
+const parseDate = require('./modules/parseDate');
 
 log4js.configure({
 	appenders: {
@@ -401,7 +402,7 @@ function writeData(data) {
 		CREATE (e65)-[:P14]->(author) `;
 		
 	if (data.date)
-		q += `CREATE (e65)-[:P4]->(:E52:UH4D {id: $e52id})-[:P82]->(date:E61:UH4D {value: $date}) `;
+		q += `CREATE (e65)-[:P4]->(:E52:UH4D {id: $e52id})-[:P82]->(date:E61:UH4D {value: $date.value, from: date($date.from), to: date($date.to), display: $date.display}) `;
 		
 	if (data.owner)
 		q += `MERGE (owner:E40:UH4D)-[:P131]->(ownerName:E82:UH4D {value: $owner.value})
@@ -441,7 +442,7 @@ function writeData(data) {
 		file: Object.assign({ id: 'd9_' + id }, data.file),
 		e65id: 'e65_' + id,
 		e52id: 'e52_' + id,
-		date: data.date,
+		date: parseDate(data.date),
 		author: {
 			id: 'e82_' + authorId,
 			value: data.author

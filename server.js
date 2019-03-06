@@ -67,13 +67,13 @@ server.timeout = 600000; // 10 minutes
 
 // shutdown routine
 process.on('exit', function () {
+	console.log('Shutdown...');
 	server.close();
 	log4js.shutdown();
 });
 
 // catch ctrl+c event and exit properly
 process.on('SIGINT', function () {
-	console.log('Shutdown...');
 	process.exit();
 });
 
