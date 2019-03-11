@@ -20,6 +20,7 @@ router.get('/image/:id/file/update', imageFileUpdate.update);
 const digitalobject = require('./digitalobject');
 router.get('/model', digitalobject.query);
 router.get('/model/:id', digitalobject.get);
+router.put('/model/:id', digitalobject.update);
 
 const actor = require('./actor');
 router.get('/person', actor.queryPersons);

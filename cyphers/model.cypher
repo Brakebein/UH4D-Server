@@ -36,3 +36,12 @@ RETURN dobj.id AS id,
        file AS file,
        materials,
        parent.id AS parent;
+
+
+// merge E22 and E41 node
+MATCH (obj:D1:UH4D)
+WHERE NOT (obj)<-[:P106]-(:D1)
+MERGE (obj)-[:P67]->(e22:E22:UH4D)
+ON CREATE SET e22.id = "e22_" + obj.id
+MERGE (e22)-[:P1]->(e41:E41:UH4D)
+ON CREATE SET e41.id = "e41_" + obj.id, e41.value = obj.name
