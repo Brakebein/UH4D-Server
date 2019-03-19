@@ -49,7 +49,7 @@ app.use('/', require('./routes'));
 
 // if no route is matched by now, it must be 404
 app.use(function (req, res) {
-	res.status = 404;
+	res.status(404);
 	res.json({
 		status: 404,
 		message: 'Not fount #1'

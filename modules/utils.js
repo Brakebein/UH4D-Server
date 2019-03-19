@@ -1,5 +1,6 @@
 const config = require('../config');
 const Promise = require('bluebird');
+const fs = require('fs-extra-promise');
 const exec = require('child-process-promise').execFile;
 
 const utils = {
@@ -82,6 +83,32 @@ const utils = {
 	replace: function (string) {
 		if (typeof string !== 'string') return string;
 		return string.replace(/[^a-zA-Z0-9_\-.]/g, '_');
+	},
+
+	unlinkDir: function (path) {
+		return fs.existsAsync(path)
+			.then(function (exists) {
+				if (exists) {
+					console.warn('Unlink directory:', path);
+					return fs.removeAsync(path);
+				}
+			})
+			.catch(function (err) {
+				console.error('Unlink directory failed:', path, err);
+			});
+	},
+
+	unlinkFile: function (path) {
+		return fs.existsAsync(path)
+			.then(function (exists) {
+				if (exists) {
+					console.warn('Unlink file:', path);
+					return fs.unlinkAsync(path);
+				}
+			})
+			.catch(function (err) {
+				console.error('Unlink file failed:', path, err);
+			});
 	}
 
 };

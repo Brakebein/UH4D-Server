@@ -1,5 +1,24 @@
-const express = require('express');
-const router = express.Router();
+const config = require('../config'),
+	express = require('express'),
+	router = express.Router(),
+	shortid = require('shortid'),
+	utils = require('../modules/utils');
+
+
+// multer
+const multer = require('multer'),
+	storage = multer.diskStorage({
+		destination: function (req, file, cb) {
+			cb(null, config.path.tmp);
+		},
+		filename: function (req, file, cb) {
+			if (req.body.tid)
+				cb(null, req.body.tid + '_' + utils.replace(file.orignalname));
+			else
+				cb(null, file.fieldname + '-' + shortid.generate());
+		}
+	});
+const mUpload = multer({ storage: storage });
 
 const image = require('./image');
 router.get('/search', image.query);
@@ -21,6 +40,10 @@ const digitalobject = require('./digitalobject');
 router.get('/model', digitalobject.query);
 router.get('/model/:id', digitalobject.get);
 router.put('/model/:id', digitalobject.update);
+
+router.post('/model/upload', mUpload.single('uploadModelFile'), require('./upload'));
+router.post('/model', digitalobject.save);
+router.post('/model/temp', digitalobject.deleteTemp);
 
 const actor = require('./actor');
 router.get('/person', actor.queryPersons);
