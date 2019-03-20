@@ -45,6 +45,8 @@ router.post('/model/upload', mUpload.single('uploadModelFile'), require('./uploa
 router.post('/model', digitalobject.save);
 router.post('/model/temp', digitalobject.deleteTemp);
 
+router.put('/model/:id/duplicate', digitalobject.duplicate);
+
 const actor = require('./actor');
 router.get('/person', actor.queryPersons);
 router.get('/legalbody', actor.queryLegalBodies);

@@ -206,7 +206,7 @@ module.exports = {
 				res.json(req.body)
 			})
 			.catch(function (err) {
-				utils.error.neo4j(res, err, 'digitalobject.update');
+				utils.error.neo4j(res, err, '#digitalobject.update');
 			});
 	},
 
@@ -332,6 +332,40 @@ module.exports = {
 				});
 			});
 
+	},
+	
+	duplicate: function (req, res) {
+
+		const id = shortid.generate();
+
+		// TODO: consider links to images
+
+		// language=Cypher
+		const q = `
+			MATCH (e22old:E22:UH4D {id: $id})
+			CREATE (e22new:E22:UH4D {id: $e22id})-[:P1]->(e41:E41:UH4D $e41)
+			WITH e22old, e22new
+			MATCH (e22old)<-[:P67]-(obj:D1)
+			CREATE (e22new)<-[:P67]-(obj)
+			RETURN e22new`;
+
+		const params = {
+			id: req.params.id,
+			e22id: 'e22_' + id + '_' + utils.replace(req.body.name),
+			e41: {
+				id: 'e41_' + id + '_' + utils.replace(req.body.name),
+				value: req.body.name + ' Duplicate'
+			}
+		};
+
+		neo4j.writeTransaction(q, params)
+			.then(function (results) {
+				console.log(results[0]);
+				res.json(req.body);
+			})
+			.catch(function (err) {
+				utils.error.neo4j(res, err, '#digitalobject.duplicate')
+			});
 	}
 
 };

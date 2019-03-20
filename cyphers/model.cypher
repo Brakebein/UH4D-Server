@@ -64,10 +64,18 @@ RETURN e22.id AS id,
        }) AS object;
 
 
+// duplicate
+MATCH (e22old:E22:UH4D {id: $id})
+CREATE (e22new:E22:UH4D {id: $e22id})-[:P1]->(e41:E41:UH4D $e41)
+WITH e22old, e22new
+MATCH (e22old)<-[:P67]-(obj:D1)
+CREATE (e22new)<-[:P67]-(obj)
+RETURN e22new;
+
 // merge E22 and E41 node
 MATCH (obj:D1:UH4D)
 WHERE NOT (obj)<-[:P106]-(:D1)
 MERGE (obj)-[:P67]->(e22:E22:UH4D)
 ON CREATE SET e22.id = 'e22_' + obj.id
 MERGE (e22)-[:P1]->(e41:E41:UH4D)
-ON CREATE SET e41.id = 'e41_' + obj.id, e41.value = obj.name
+ON CREATE SET e41.id = 'e41_' + obj.id, e41.value = obj.name;
