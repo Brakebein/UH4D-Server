@@ -35,16 +35,12 @@ module.exports = {
 				WITH image, date
 				WHERE date ${req.query.undated === 'true' ? 'IS NULL OR' : 'IS NOT NULL AND'} date.to > date($from) AND date.from < date($to)`;
 
-		if (objIncl.length)
+		if (objIncl.length || objExcl.length)
 			q += `
-				MATCH (image)-[:P138]->(:E22)<-[:P67]-(dobjIn:D1)
-				WHERE dobjIn.id IN $includes`;
-
-		if (objExcl.length)
-			q += `
-				MATCH (dobjEx:D1:UH4D)
-				WHERE dobjEx.id IN $excludes 
-				AND NOT (image)-[:P138]->(:E22)<-[:P67]-(dobjEx)`;
+				CALL apoc.path.expandConfig(image, {relationShipFilter: "P138>|link", labelFilter: "E22", minLevel: 1}) YIELD path
+				WITH image, last(nodes(path)) AS e22
+				MATCH (e22)<-[:P67]-(dobj:D1)
+				WHERE dobj.id IN $includes AND NOT dobj.id IN $excludes`;
 
 		q += `
 			WITH image
