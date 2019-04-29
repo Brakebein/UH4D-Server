@@ -9,7 +9,7 @@ module.exports = {
 	query: function (req, res) {
 		// console.log(req.query);
 
-		let term = req.query.query ? req.query.query.split(/\s+/) : false;
+		let term = req.query.query ? req.query.query.split(/\s+/) : [];
 		let objIncl = req.query.filterObjIncl || [];
 		let objExcl = req.query.filterObjExcl || [];
 
@@ -18,6 +18,14 @@ module.exports = {
 
 		// console.log(objIncl);
 		// console.log(objExcl);
+
+		if (term.indexOf('dummy:show') === -1) {
+			if (term.indexOf('dummy:hide') === -1)
+				term.push('dummy:hide');
+		}
+		else {
+			term.splice(term.indexOf('dummy:show'), 1);
+		}
 
 		let capNo = [],
 			regexTitle = [],
@@ -68,6 +76,8 @@ module.exports = {
 					q += 'spatial IS NOT NULL';
 				else if (string === 'spatial:unset')
 					q += 'spatial IS NULL';
+				else if (string === 'dummy:hide')
+					q += 'NOT image.id =~ ".*_dummy"';
 				else {
 					q += 'identifier.slub_cap_no = $capNo[' + index + '] ';
 					q += 'OR title.value =~ $regexTitle[' + index + '] ';
