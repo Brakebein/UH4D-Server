@@ -1,0 +1,248 @@
+openapi: 3.0.2
+
+# /image
+path:
+  get:
+    tags: [Image]
+    summary: Get all images (filtered by query)
+    parameters:
+      - name: query
+        description: Query string to filter results
+        in: query
+        schema:
+          type: string
+      - name: from
+        description: Time-span minimum value
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: to
+        description: Time-span maximum value
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: filterObjIncl
+        description: Object IDs that are used to filter images, whether they depict the objects with provided IDs
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+      - name: filterObjExcl
+        description: Object IDs that are used to filter results, whether they do not depict the objects with provided IDs
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+    responses:
+      '200':
+        description: List of images.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/schema/default'
+      '500':
+        $ref: 'responses.yaml#/GeneralError'
+
+
+# /image/{id}
+pathParam:
+  parameters:
+    - $ref: '#/parameter'
+  get:
+    tags: [Image]
+    summary: Get image
+    responses:
+      '200':
+        $ref: '#/response'
+      '500':
+        $ref: 'responses.yaml#/GeneralError'
+
+# /image/dateExtent
+pathDateExtent:
+  get:
+    tags: [Image]
+    summary: Get extent of image dates
+    responses:
+      '200':
+        description: Date extent
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from:
+                  description: Minimum date
+                  type: string
+                  format: date
+                  example: '1768-01-01'
+                to:
+                  description: Maximum date
+                  type: string
+                  format: date
+                  example: '2015-06-02'
+      '500':
+        $ref: 'responses.yaml#/GeneralError'
+
+# components:
+parameter:
+  description: Image ID
+  name: id
+  in: path
+  required: true
+
+response:
+  description: Default Image response
+  content:
+    application/json:
+      schema:
+        $ref: '#/schema/default'
+
+schema:
+  default:
+    description: Image details
+    type: object
+    properties:
+      id:
+        description: Image ID
+        type: string
+        example: ryyJVqZMG_df_bika102_0000215_motiv.jpg
+      title:
+        description: Image title
+        type: string
+        example: Dresden-Altstadt. Zwinger
+      description:
+        description: More detailed informaton
+        type: string
+        nullable: true
+        example: Ansicht mit Kronentor
+      author:
+        description: Name of the photographer
+        type: string
+        nullable: true
+        example: Hahn, Walter
+      owner:
+        description: Owner of the image, instititution that holds the rights (usually libraries or archives)
+        type: string
+        nullable: true
+        example: SLUB / Deutsche Fotothek
+      misc:
+        description: Miscellaneous metadata
+        type: string
+        nullable: true
+        example: Negativ (schwarzweiß), Nachtaufnahme
+      captureNumber:
+        description: Archive capture number
+        type: string
+        example: df_bika102_0000215_motiv
+      permalink:
+        description: Link to original archive entry
+        type: string
+        example: http://www.deutschefotothek.de/documents/obj/90073368
+      date:
+        description: Temporal information defining a time-span
+        type: object
+        nullable: true
+        properties:
+          value:
+            description: Original value as retrieved from archive
+            type: string
+            example: '1965'
+          from:
+            description: Minimum date value
+            type: string
+            format: date
+            example: '1965-01-01'
+          to:
+            description: Maximum date value
+            type: string
+            format: date
+            example: '1965-12-31'
+          display:
+            description: How to present the time-span
+            type: string
+            example: YYYY
+      spatial:
+        allOf:
+          - $ref: '#/schema/spatial'
+          - nullable: true
+      file:
+        $ref: '#/schema/file'
+      tags:
+        description: Associated tags
+        type: array
+        items:
+          type: string
+        example: ['Architektur', 'Festarchitektur', 'Gemäldegalerie', 'Rotunde']
+
+  file:
+    description: File reference information
+    type: object
+    properties:
+      id:
+        description: File ID and filename
+        type: string
+        example: d9_ryyJVqZMG_df_bika102_0000215_motiv.jpg
+      path:
+        description: Path to files
+        type: string
+        example: images/ac5d37e1-1300-45b3-a8c8-063fe7604d70/
+      preview:
+        description: Down-sampled image with resolution up to 2048px
+        type: string
+        example: d9_ryyJVqZMG_df_bika102_0000215_motiv_preview.jpg
+      thumb:
+        description: Thumbnail image with resolution up to 200px
+        type: string
+        example: d9_ryyJVqZMG_df_bika102_0000215_motiv_thumb.jpg
+      original:
+        description: Original filename
+        type: string
+        example: df_bika102_0000215_motiv.jpg
+      type:
+        description: File format
+        type: string
+        example: jpg
+      width:
+        description: Image width in pixel
+        type: integer
+        example: 1600
+      height:
+        description: Image height in pixel
+        type: integer
+        example: 2263
+
+  spatial:
+    description: Spatial information
+    type: object
+    properties:
+      id:
+        description: Spatial information ID
+        type: string
+        example: spatial_ryyJVqZMG_df_bika102_0000215_motiv.jpg
+      matrix:
+        description: Transformation matrix
+        type: array
+        items:
+          type: number
+          format: float
+        minItems: 16
+        maxItems: 16
+      offset:
+        type: array
+        items:
+          type: number
+          format: float
+        minItems: 2
+        maxItems: 2
+        example: [0, 0]
+      ck:
+        description: Camera constant
+        type: number
+        format: float
+        example: 1.025151920789648

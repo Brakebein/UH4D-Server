@@ -1,0 +1,33 @@
+openapi: 3.0.2
+
+GeneralError:
+  description: General Error. Something went wrong, e.g. MySQL/Neo4j database request, file system failure.
+  content:
+    application/json:
+      schema:
+        properties:
+          message:
+            type: string
+          originalErr:
+            anyOf:
+              - type: string
+              - type: object
+      examples:
+        Neo4j:
+          summary: Example response, if failure on Neo4j database request.
+          value:
+            message: 'Neo4j failure #projects.query'
+            originalError: Neo4jSyntaxException ...
+
+MissingData:
+  description: At least one of the required content in request body is missing. HTTP status code should actually be __400__ or __422__.
+  content:
+    application/json:
+      schema:
+        properties:
+          message:
+            type: string
+        example:
+          summary: Example response for missing data.
+          value:
+            message: Missing essential data | body.name

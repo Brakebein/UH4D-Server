@@ -51,7 +51,7 @@ const utils = {
 			let message = 'Missing essential data';
 			if (add) message += ' | ' + add;
 			console.warn(message);
-			res.status(510);
+			res.status(400);
 			res.json({
 				message: message
 			});

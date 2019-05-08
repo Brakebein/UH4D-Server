@@ -51,7 +51,6 @@ app.use('/', require('./routes'));
 app.use(function (req, res) {
 	res.status(404);
 	res.json({
-		status: 404,
 		message: 'Not fount #1'
 	});
 });

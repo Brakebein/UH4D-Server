@@ -1,0 +1,33 @@
+openapi: 3.0.2
+info:
+  version: 0.4.2
+  title: UH4D Server API
+  x-logo:
+    url: 'logo_api.png'
+    backgroundColor: '#4E5D6C'
+    altText: UH4D Server API
+  description: |
+    This is a not yet complete documentation of the server-side RESTful API of UrbanHistory4D Browser.
+
+    Client application can be visited at [http://4dbrowser.urbanhistory4d.org](http://4dbrowser.urbanhistory4d.org)
+
+    For more information on the project, visit: [http://urbanhistory4d.org](http://urbanhistory4d.org)
+
+servers:
+  - url: 'https://4dbrowser.urbanhistory4d.org/api'
+
+tags:
+  - name: Image
+    description: Image related operations.
+  - name: Model
+    description: 3D model related operations.
+
+paths:
+  /image:
+    $ref: components/image.yaml#/path
+
+  /image/{id}:
+    $ref: components/image.yaml#/pathParam
+
+  /image/dateExtent:
+    $ref: components/image.yaml#/pathDateExtent
