@@ -144,7 +144,7 @@ module.exports = {
 				(image)-[:P48]->(identifier:E42),
 				(image)<-[:P94]-(e65:E65)
 			OPTIONAL MATCH (e65)-[:P14]->(:E21)-[:P131]->(author:E82)
-			OPTIONAL MATCH (e65)-[:P4]->(:E52)-[:P82]->(date:E61)
+			OPTIONAL MATCH (e65)-[:P4]->(:E52)-[:P82]->(nDate:E61)
 			OPTIONAL MATCH (image)-[:P105]->(:E40)-[:P131]->(owner:E82)
 			OPTIONAL MATCH (image)-[:P3]->(desc:E62)-[:P3_1]->(:E55 {id: "image_description"})
 			OPTIONAL MATCH (image)-[:P3]->(misc:E62)-[:P3_1]->(:E55 {id: "image_miscellaneous"})
@@ -157,7 +157,7 @@ module.exports = {
 				identifier.permalink AS permalink,
 				identifier.slub_cap_no AS captureNumber,
 				author.value AS author,
-				date {.*, from: toString(date.from), to: toString(date.to)} AS date,
+				nDate {.*, from: toString(nDate.from), to: toString(nDate.to)} AS date,
 				owner.value AS owner,
 				desc.value AS description,
 				misc.value AS misc,

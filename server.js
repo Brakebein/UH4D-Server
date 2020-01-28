@@ -1,3 +1,4 @@
+const config = require('./config');
 const express = require('express');
 const bodyParser = require('body-parser');
 const compression = require('compression');
@@ -45,7 +46,8 @@ app.all('/*', function (req, res, next) {
 	}
 });
 
-app.use('/', require('./routes'));
+app.use('/api', require('./routes'));
+app.use('/data', express.static(config.path.data));
 
 // if no route is matched by now, it must be 404
 app.use(function (req, res) {
