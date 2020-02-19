@@ -55,7 +55,7 @@ function parseDescription(elements) {
     misc: []
   };
 
-  const dateRegexp = "(?:\\w+\\s)?[0-9.\\s\\/]+";
+  const dateRegexp = "(?:\\w+\\s)?[0-9.]+(?:[\\/\\s]+[0-9.]+)?";
 
   for (let i = 0, l = elements.length; i < l; i++) {
     const el = elements[i];
