@@ -25,6 +25,8 @@ async function checkDatabaseEntry(slubId) {
 
 async function writeToDatabase(data) {
 
+  const date = parseDate(data.date);
+
   let q = `
 		MATCH (tdesc:E55:UH4D {id: "image_description"}), (tmisc:E55:UH4D {id: "image_miscellaneous"})
 		CREATE (image:E38:UH4D {id: $imageId}),
@@ -38,7 +40,7 @@ async function writeToDatabase(data) {
 			ON CREATE SET author.id = $authorId, authorName.id = $author.id
 		CREATE (e65)-[:P14]->(author) `;
 
-  if (data.date)
+  if (date)
     q += `CREATE (e65)-[:P4]->(:E52:UH4D {id: $e52id})-[:P82]->(date:E61:UH4D {value: $date.value, from: date($date.from), to: date($date.to), display: $date.display}) `;
 
   if (data.owner)
@@ -78,7 +80,7 @@ async function writeToDatabase(data) {
     file: Object.assign({ id: 'd9_' + id }, data.file),
     e65id: 'e65_' + id,
     e52id: 'e52_' + id,
-    date: parseDate(data.date),
+    date: date,
     author: {
       id: 'e82_' + authorId,
       value: data.author
