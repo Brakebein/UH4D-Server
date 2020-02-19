@@ -4,12 +4,12 @@ const request = require('request-promise');
 const Promise = require('bluebird');
 const XmlStream = require('xml-stream');
 const execFile = require('child-process-promise').execFile;
-const neo4j = require('./modules/neo4j-request');
+const neo4j = require('../modules/neo4j-request');
 const uuid = require('uuid/v4');
 const shortid = require('shortid');
-const config = require('./config');
-const utils = require('./modules/utils');
-const parseDate = require('./modules/parseDate');
+const config = require('../config');
+const utils = require('../modules/utils');
+const parseDate = require('../modules/parseDate');
 
 log4js.configure({
 	appenders: {
