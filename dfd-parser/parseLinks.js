@@ -144,6 +144,12 @@ async function processWorkflow(id) {
     htmlFile = await requestDetailsPage(id);
     Object.assign(meta, await parseHTMLFile(htmlFile));
 
+    // if no download link is available, skip this image
+    if (!meta.fileLink) {
+      console.warn('Missing download link. Skip...');
+      return;
+    }
+
     imageFile = await requestImage(meta.fileLink);
     meta.file = await processImage(imageFile);
 
