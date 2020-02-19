@@ -71,13 +71,19 @@ async function init() {
     // start workflow for each id
     await P.mapSeries(ids, (id, index, length) => {
       console.log('Process ' + index + ' / ' + length, id);
-      return new Promise((resolve, reject) => {
-        // wait 1 second
-        setTimeout(() => {
-          processWorkflow(id)
-            .then(resolve)
-            .catch(reject);
-        }, 1000);
+      return new Promise(async (resolve, reject) => {
+        try {
+          const result = await processWorkflow(id);
+          if (result === 'exists') {
+            // go to next one
+            setTimeout(resolve, 20);
+          } else {
+            // wait 1 second and go to next one
+            setTimeout(resolve, 1000);
+          }
+        } catch (err) {
+          reject(err);
+        }
       });
     });
 
@@ -128,7 +134,7 @@ async function processWorkflow(id) {
 
   if (entryExists) {
     console.debug('Already exists. Skip...');
-    return;
+    return 'exists';
   }
 
   const meta = {

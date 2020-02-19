@@ -55,7 +55,7 @@ function parseDescription(elements) {
     misc: []
   };
 
-  const dateRegexp = "(?:\\w+\\s)?[0-9.\\/]+";
+  const dateRegexp = "(?:\\w+\\s)?[0-9.\\s\\/]+";
 
   for (let i = 0, l = elements.length; i < l; i++) {
     const el = elements[i];
@@ -80,6 +80,10 @@ function parseDescription(elements) {
           desc.date = new RegExp('(' + dateRegexp + ')').exec(elements[i + 1])[1];
           i++;
         }
+      }
+      // erase space around slash (e.g. '1925/ 1945' -> '1925/1945')
+      if (/\d{4}\s?\/\s?\d{4}/.test(desc.date)) {
+        desc.date = desc.date.replace(/(\d{4})\s?\/\s?(\d{4})/, '$1/$2');
       }
     } else if (typeof el === 'string' && /eigentümer/i.test(el)) {
       desc.owner = elements[i + 1].$text;
