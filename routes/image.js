@@ -63,7 +63,11 @@ module.exports = {
 			OPTIONAL MATCH (image)-[:P3]->(misc:E62)-[:P3_1]->(:E55 {id: "image_miscellaneous"})
 			OPTIONAL MATCH (image)-[:has_spatial]->(spatial:Spatial)
 			OPTIONAL MATCH (image)-[:has_tag]->(tag:TAG)
-			WITH image, file, title, identifier, author, date, owner, desc, misc, spatial, collect(tag.id) AS tags `;
+			OPTIONAL MATCH (image)<-[:P41]-(e17:E17)-[:P42]->(:E55 {id: "meta_check"}),
+										 (e17)-[:P14]->(checkUser:E21),
+										 (e17)-[:P4]->(:E52)-[:P82]->(checkDate:E61)
+			WITH image, file, title, identifier, author, date, owner, desc, misc, spatial, collect(tag.id) AS tags,
+					 CASE WHEN e17 IS NOT NULL THEN {user: checkUser.id, from: toString(checkDate.from), to: toString(checkDate.to)} ELSE NULL END AS checked `;
 
 		if (term) {
 			term.forEach(function (string, index) {
@@ -109,7 +113,8 @@ module.exports = {
 				desc.value AS description,
 				misc.value AS misc,
 				spatial,
-				tags`;
+				tags,
+				checked`;
 			// LIMIT 20`;
 
 		let params = {
@@ -144,12 +149,15 @@ module.exports = {
 				(image)-[:P48]->(identifier:E42),
 				(image)<-[:P94]-(e65:E65)
 			OPTIONAL MATCH (e65)-[:P14]->(:E21)-[:P131]->(author:E82)
-			OPTIONAL MATCH (e65)-[:P4]->(:E52)-[:P82]->(nDate:E61)
+			OPTIONAL MATCH (e65)-[:P4]->(:E52)-[:P82]->(date:E61)
 			OPTIONAL MATCH (image)-[:P105]->(:E40)-[:P131]->(owner:E82)
 			OPTIONAL MATCH (image)-[:P3]->(desc:E62)-[:P3_1]->(:E55 {id: "image_description"})
 			OPTIONAL MATCH (image)-[:P3]->(misc:E62)-[:P3_1]->(:E55 {id: "image_miscellaneous"})
 			OPTIONAL MATCH (image)-[:has_spatial]->(spatial:Spatial)
 			OPTIONAL MATCH (image)-[:has_tag]->(tag:TAG)
+			OPTIONAL MATCH (image)<-[:P41]-(e17:E17)-[:P42]->(:E55 {id: "meta_check"}),
+										 (e17)-[:P14]->(checkUser:E21),
+										 (e17)-[:P4]->(:E52)-[:P82]->(checkDate:E61)
 	
 			RETURN image.id AS id,
 				file,
@@ -157,12 +165,13 @@ module.exports = {
 				identifier.permalink AS permalink,
 				identifier.slub_cap_no AS captureNumber,
 				author.value AS author,
-				nDate {.*, from: toString(nDate.from), to: toString(nDate.to)} AS date,
+				date {.*, from: toString(date.from), to: toString(date.to)} AS date,
 				owner.value AS owner,
 				desc.value AS description,
 				misc.value AS misc,
 				spatial,
-				collect(tag.id) AS tags`;
+				collect(tag.id) AS tags,
+				CASE WHEN e17 IS NOT NULL THEN {user: checkUser.id, from: toString(checkDate.from), to: toString(checkDate.to)} ELSE NULL END AS checked`;
 
 		const params = {
 			id: req.params.id
@@ -280,6 +289,23 @@ module.exports = {
 						MERGE (image)-[:has_tag]->(t)
 					)`;
 				params.tags = req.body.tags || [];
+				break;
+
+			case 'checked':
+				q += `MATCH (check:E55:UH4D {id: "meta_check"})
+					OPTIONAL MATCH (image)<-[:P41]-(:E17)-[ruser:P14]->(:E21)
+					MERGE (image)<-[:P41]-(e17:E17:UH4D)-[:P42]->(check)
+						ON CREATE SET e17.id = $e17id
+					MERGE (user:E21:UH4D {id: $checked.user})
+					CREATE (e17)-[:P14]->(user)
+					MERGE (e17)-[:P4]->(e52:E52:UH4D)-[:P82]->(date:E61:UH4D)
+						ON CREATE SET e52.id = $e52id
+					SET date.from = datetime($checked.from),
+							date.to = datetime($checked.to)
+					DELETE ruser`;
+				params.e17id = 'e17_checked_' + id;
+				params.e52id = 'e52_checked_' + id;
+				params.checked = req.body.checked;
 		}
 
 		q += ` RETURN image`;
