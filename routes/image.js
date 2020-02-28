@@ -337,7 +337,8 @@ module.exports = {
 					matrix: req.body.spatialize.matrix,
 					offset: req.body.spatialize.offset,
 					ck: req.body.spatialize.ck
-				}
+				},
+				meta: req.body.spatialize.meta
 			});
 		}
 		else {
@@ -351,7 +352,8 @@ module.exports = {
 					MATCH (image:E38:UH4D {id: $id})
 					MERGE (spatial:Spatial:UH4D {id: $spatial.id})
 					SET spatial = $spatial
-					MERGE (image)-[:has_spatial]->(spatial)
+					MERGE (image)-[r:has_spatial]->(spatial)
+					SET r = $meta
 					RETURN spatial`;
 
 				return neo4j.writeTransaction(q, params);
