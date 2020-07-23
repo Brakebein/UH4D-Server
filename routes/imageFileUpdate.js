@@ -6,7 +6,7 @@ const fs = require('fs-extra-promise');
 const execFile = require('child-process-promise').execFile;
 const uuid = require('uuid/v4');
 const requestImageSize = require('request-image-size');
-const neo4j = require('../modules/neo4j-request');
+const neo4j = require('neo4j-request');
 
 
 function getFileMetaData(id) {

@@ -1,23 +1,10 @@
 module.exports = {
 
-	database: {
-		host: '127.0.0.1',
-		user: 'root',
-		password: '',
-		database: 'db_dokuvis'
-	},
-
 	neo4j: {
-		uriCypher: 'http://127.0.0.1:7474/db/data/cypher',
-		uriTransaction: 'http://127.0.0.1:7474/db/data/transaction/commit',
-		uriBolt: 'bolt://127.0.0.1:7687',
-		auth: 'Basic Base64(user:pw)',
+		url: 'neo4j://localhost',
 		user: 'user',
-		password: 'pw'
-	},
-
-	secret: function() {
-		return 'verysecretkey'
+		password: 'pw',
+		database: 'uh4d'
 	},
 
 	path: {

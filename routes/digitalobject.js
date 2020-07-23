@@ -1,6 +1,6 @@
 const config = require('../config'),
 	utils = require('../modules/utils'),
-	neo4j = require('../modules/neo4j-request'),
+	neo4j = require('neo4j-request'),
 	shortid = require('shortid'),
 	moment = require('moment'),
 	fs = require('fs-extra-promise'),

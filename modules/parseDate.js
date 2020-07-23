@@ -2,7 +2,7 @@ const moment = require('moment');
 
 module.exports = function (value) {
 
-	const regex = /^(?:(um|vor|nach)\s)?(\d{2,4})(?:(?:\.(\d{2})(?:\.(\d{2,4}))?)|(?:\/(\d{4})))?$/;
+	const regex = /^(?:(um|vor|nach|wohl)\s)?(\d{2,4})(?:(?:\.(\d{2})(?:\.(\d{2,4}))?)|(?:\/(\d{4})))?$/;
 
 	let matches = regex.exec(value);
 
@@ -61,7 +61,7 @@ module.exports = function (value) {
 			display = 'YYYY/YYYY';
 		}
 		else if (prefix) {
-			if (prefix === 'um') {
+			if (prefix === 'um' || prefix === 'wohl') {
 				from = moment(year, 'YYYY').subtract(5, 'years').startOf('year').format('YYYY-MM-DD');
 				to = moment(year, 'YYYY').add(5, 'years').endOf('year').format('YYYY-MM-DD');
 				display = 'around YYYY';

@@ -4,12 +4,12 @@ const request = require('request-promise');
 const Promise = require('bluebird');
 const XmlStream = require('xml-stream');
 const execFile = require('child-process-promise').execFile;
-const neo4j = require('./modules/neo4j-request');
+const neo4j = require('neo4j-request');
 const uuid = require('uuid/v4');
 const shortid = require('shortid');
-const config = require('./config');
-const utils = require('./modules/utils');
-const parseDate = require('./modules/parseDate');
+const config = require('../config');
+const utils = require('../modules/utils');
+const parseDate = require('../modules/parseDate');
 
 log4js.configure({
 	appenders: {
@@ -35,8 +35,11 @@ else {
 	process.exit(1);
 }
 
-// read directory with images
-fs.readdirAsync(retrievalPath)
+neo4j.init(config.neo4j.url, config.neo4j.user, config.neo4j.password, config.neo4j.database)
+	.then(() => {
+		// read directory with images
+		return fs.readdirAsync(retrievalPath);
+	})
 	.then(function (files) {
 
 		//files.splice(0, 45);

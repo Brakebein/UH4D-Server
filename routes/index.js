@@ -2,7 +2,8 @@ const config = require('../config'),
 	express = require('express'),
 	router = express.Router(),
 	shortid = require('shortid'),
-	utils = require('../modules/utils');
+	utils = require('../modules/utils'),
+	replaceFileLinks = require('../modules/replaceFileLinks');
 
 
 // multer
@@ -31,6 +32,9 @@ router.put('/image/:id/spatial', image.setSpatial);
 router.put('/image/:id/link', image.setLinksToObjects);
 router.post('/image/dummy', image.createDummy);
 router.delete('/image/dummy/:id', image.deleteDummy);
+
+router.get('/imagesWithLinks', replaceFileLinks, image.query);
+router.get('/imagesWithLinks/:id', replaceFileLinks, image.get);
 
 const imageFileUpdate = require('./imageFileUpdate');
 router.get('/image/:id/file/check', imageFileUpdate.check);

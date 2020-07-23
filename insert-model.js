@@ -2,12 +2,15 @@ const utils = require('./modules/utils');
 const fs = require('fs-extra-promise');
 const shortid = require('shortid');
 const uuid = require('uuid/v4');
-const neo4j = require('./modules/neo4j-request');
+const neo4j = require('neo4j-request');
 
 let file = process.argv[2];
 let shortPath = 'models/' + uuid() + '/';
 
-fs.readFileAsync(file)
+neo4j.init(config.neo4j.url, config.neo4j.user, config.neo4j.password, config.neo4j.database)
+.then(() => {
+	return fs.readFileAsync(file);
+})
 .then(function (string) {
 	let json = JSON.parse(string);
 

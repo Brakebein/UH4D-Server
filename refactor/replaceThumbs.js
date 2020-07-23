@@ -1,12 +1,15 @@
 const config = require('../config');
 const utils = require('../modules/utils');
-const neo4j = require('../modules/neo4j-request');
+const neo4j = require('neo4j-request');
 const execFile = require('child-process-promise').execFile;
 const fs = require('fs-extra-promise');
 const request = require('request-promise');
 const Promise = require('bluebird');
 
-request.get('http://localhost:3001/image')
+neo4j.init(config.neo4j.url, config.neo4j.user, config.neo4j.password, config.neo4j.database)
+.then(() => {
+	return request.get('http://localhost:3001/image');
+})
 .then(function (response) {
 	let results = JSON.parse(response);
 
