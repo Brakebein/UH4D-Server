@@ -1,5 +1,5 @@
 const utils = require('../modules/utils');
-const neo4j = require('../modules/neo4j-request');
+const neo4j = require('neo4j-request');
 
 module.exports = {
 

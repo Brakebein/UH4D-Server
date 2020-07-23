@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const log4js = require('log4js');
+const neo4j = require('neo4j-request');
 
 // logger
 log4js.configure({
@@ -23,6 +24,8 @@ console.debug = logger.debug.bind(logger);
 console.warn = logger.warn.bind(logger);
 console.error = logger.error.bind(logger);
 
+
+neo4j.init(config.neo4j.url, config.neo4j.user, config.neo4j.password, config.neo4j.database);
 
 const app = express();
 

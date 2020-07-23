@@ -1,5 +1,5 @@
 const utils = require('../modules/utils');
-const neo4j = require('../modules/neo4j-request');
+const neo4j = require('neo4j-request');
 const Promise = require('bluebird');
 const shortid = require('shortid');
 const parseDate = require('../modules/parseDate');

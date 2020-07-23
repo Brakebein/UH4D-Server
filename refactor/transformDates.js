@@ -13,7 +13,8 @@
  */
 
 // requires
-const neo4j = require('../modules/neo4j-request');
+const config = require('../config');
+const neo4j = require('neo4j-request');
 const parseDate = require('../modules/parseDate');
 
 
@@ -25,8 +26,10 @@ const qQuery = `
 `;
 
 // query entries
-
-neo4j.readTransaction(qQuery)
+neo4j.init(config.neo4j.url, config.neo4j.user, config.neo4j.password, config.neo4j.database)
+	.then(() => {
+		return neo4j.readTransaction(qQuery);
+	})
 	.then(function (results) {
 
 		// test data

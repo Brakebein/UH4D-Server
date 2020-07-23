@@ -4,6 +4,7 @@ const LineByLineReader = require('line-by-line');
 const P = require('bluebird');
 const log4js = require('log4js');
 const config = require('../config');
+const neo4j = require('neo4j-request');
 const {processImage} = require("./modules/processImage");
 const {parseHTMLFile} = require("./modules/parser");
 const {requestDetailsPage, requestImage} = require("./modules/request-dfd");
@@ -61,6 +62,9 @@ opt.argv.forEach(argv => {
 init();
 
 async function init() {
+
+  // connect neo4j database
+  await neo4j.init(config.neo4j.url, config.neo4j.user, config.neo4j.password, config.neo4j.database);
 
   try {
     // process all link files

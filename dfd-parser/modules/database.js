@@ -1,4 +1,4 @@
-const neo4j = require('../../modules/neo4j-request');
+const neo4j = require('neo4j-request');
 const shortId = require('shortid');
 const utils = require('../../modules/utils');
 const parseDate = require('../../modules/parseDate');
