@@ -17,7 +17,7 @@
     "body-parser": "^1.18.3",
     "child-process-promise": "^2.2.1",
     "compression": "^1.7.3",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "fs-extra": "^8.1.0",
     "fs-extra-promise": "^1.0.1",
     "jszip": "^3.2.0",
